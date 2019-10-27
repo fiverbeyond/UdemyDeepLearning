@@ -115,6 +115,8 @@ cm = confusion_matrix(y_test, y_pred)
 
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import cross_val_score
+from keras.models import Sequential
+from keras.layers import Dense
 
 # Based on how we built the ANN above.
 def build_classifier():
@@ -134,3 +136,38 @@ mean = accuracies.mean()
 variance = accuracies.std()
 
 # Implementing Dropout
+
+
+
+###   TUNING THE ARTIFICIAL NEURAL NETWORK        ###
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+from keras.models import Sequential
+from keras.layers import Dense
+
+# Based on how we built the ANN above.
+def build_classifier(opt):
+    myNeuralNetwork = Sequential()
+    myNeuralNetwork.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu', input_dim = 11))
+    myNeuralNetwork.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu'))
+    myNeuralNetwork.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))
+    myNeuralNetwork.compile(optimizer = opt, loss = 'binary_crossentropy', metrics = ['accuracy'])
+    return myNeuralNetwork
+
+myNeuralNetwork = KerasClassifier(build_fn = build_classifier)
+
+
+# Optimizing hyperparameters via gridsearch.
+parameters = {'batch_size' : [25, 32],
+              'nb_epoch'   : [100, 500],
+              'optimizer'  : ['adam', 'rmsprop']}
+grid_search = GridSearchCV(estimator = classifier,
+                           param_grid = parameters,
+                           scoring = 'accuracy',
+                           cv = 10)
+
+grid_search = grid_search.fit(X_train, y_train)
+best_parameters = grid_search.best_params_
+best_accuracy = grid_search.best_score_
+
+
